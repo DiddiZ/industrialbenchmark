@@ -24,9 +24,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from collections import OrderedDict
+
 import gym
 import numpy as np
-from collections import OrderedDict
 
 from industrial_benchmark_python.IDS import IDS
 
@@ -35,8 +36,17 @@ class IBGym(gym.Env):
     """
     OpenAI Gym Wrapper for the industrial benchmark
     """
-    def __init__(self, setpoint, reward_type="classic", action_type="continuous", observation_type="classic",
-                 reset_after_timesteps=1000, init_seed=None, n_past_timesteps=30):
+
+    def __init__(
+        self,
+        setpoint,
+        reward_type="classic",
+        action_type="continuous",
+        observation_type="classic",
+        reset_after_timesteps=1000,
+        init_seed=None,
+        n_past_timesteps=30
+    ):
         """
         Initializes the underlying environment, seeds numpy and initializes action / observation spaces
         as well as other necessary variables
@@ -79,7 +89,7 @@ class IBGym(gym.Env):
         self.observation = None  # contains the current observation
 
         # Defining the action space
-        if self.action_type == 'discrete':  # Discrete action space with three values per steering (3^3 = 27)
+        if self.action_type == "discrete":  # Discrete action space with three values per steering (3^3 = 27)
             self.action_space = gym.spaces.Discrete(27)
 
             # A list of all possible discretized actions
@@ -89,7 +99,7 @@ class IBGym(gym.Env):
                     for s in [-1, 0, 1]:
                         self.env_action.append([v, g, s])
 
-        elif self.action_type == 'continuous':  # Continuous action space for each steering [-1,1]
+        elif self.action_type == "continuous":  # Continuous action space for each steering [-1,1]
             self.action_space = gym.spaces.Box(np.array([-1, -1, -1]), np.array([+1, +1, +1]))
 
         else:
@@ -127,16 +137,16 @@ class IBGym(gym.Env):
         self.last_action = action
 
         # Executing the action and saving the observation
-        if self.action_type == 'discrete':
+        if self.action_type == "discrete":
             self.IB.step(self.env_action[action])  # for discrete actions, we expect the action's index
-        elif self.action_type == 'continuous':
+        elif self.action_type == "continuous":
             self.IB.step(action)  # in the continuous case, we expect the entire three dimensional action
 
         # update observation representation
         return_observation = self._update_observation()
 
         # Calculating both the relative reward (improvement or decrease) and updating the absolute reward
-        new_reward = -self.IB.state['cost']
+        new_reward = -self.IB.state["cost"]
         self.delta_reward = new_reward - self.reward  # positive when improved
         self.reward = new_reward
 
@@ -151,13 +161,15 @@ class IBGym(gym.Env):
         # Two reward functions are available:
         # 'classic' which returns the original cost and
         # 'delta' which returns the change in the cost function w.r.t. the previous cost
-        if self.reward_function == 'classic':
+        if self.reward_function == "classic":
             return_reward = self.reward
-        elif self.reward_function == 'delta':
+        elif self.reward_function == "delta":
             return_reward = self.delta_reward
         else:
-            raise ValueError('Invalid reward function specification. "classic" for the original cost function'
-                             ' or "delta" for the change in the cost fucntion between steps.')
+            raise ValueError(
+                'Invalid reward function specification. "classic" for the original cost function'
+                ' or "delta" for the change in the cost fucntion between steps.'
+            )
 
         self.info = self._markovian_state()  # entire markov state - not all info is visible in observations
         return return_observation, return_reward, self.done, self.info
@@ -179,7 +191,7 @@ class IBGym(gym.Env):
         return_observation = self._update_observation()
 
         self.info = self._markovian_state()
-        self.reward = -self.IB.state['cost']
+        self.reward = -self.IB.state["cost"]
 
         # Alternative reward that returns the improvement or decrease in the cost function
         # If the cost function improves/decreases, the reward is positive
@@ -199,13 +211,13 @@ class IBGym(gym.Env):
 
         return return_observation
 
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         """
         prints the current reward, state, and last action taken
         :param mode: not used, needed to overwrite the abstract method though
         """
 
-        print('Reward:', self.reward, 'State (v,g,s):', self.IB.visibleState()[1:4], 'Action: ', self.last_action)
+        print("Reward:", self.reward, "State (v,g,s):", self.IB.visibleState()[1:4], "Action: ", self.last_action)
 
     def _update_observation(self):
         """
@@ -248,32 +260,34 @@ class IBGym(gym.Env):
         get the entire markovian state for debugging purposes
         :return: markov state as a dctionary
         """
-        markovian_states_variables = ['setpoint', 'velocity', 'gain', 'shift', 'fatigue', 'consumption',
-                                      'op_cost_t0', 'op_cost_t1', 'op_cost_t2', 'op_cost_t3', 'op_cost_t4',
-                                      'op_cost_t5', 'op_cost_t6', 'op_cost_t7', 'op_cost_t8', 'op_cost_t9',
-                                      'ml1', 'ml2', 'ml3', 'hv', 'hg']
+        markovian_states_variables = [
+            "setpoint", "velocity", "gain", "shift", "fatigue", "consumption", "op_cost_t0", "op_cost_t1", "op_cost_t2", "op_cost_t3",
+            "op_cost_t4", "op_cost_t5", "op_cost_t6", "op_cost_t7", "op_cost_t8", "op_cost_t9", "ml1", "ml2", "ml3", "hv", "hg"
+        ]
 
-        markovian_states_values = [self.IB.state['p'],
-                                   self.IB.state['v'],
-                                   self.IB.state['g'],
-                                   self.IB.state['h'],
-                                   self.IB.state['f'],
-                                   self.IB.state['c'],
-                                   self.IB.state['o'][0],
-                                   self.IB.state['o'][1],
-                                   self.IB.state['o'][2],
-                                   self.IB.state['o'][3],
-                                   self.IB.state['o'][4],
-                                   self.IB.state['o'][5],
-                                   self.IB.state['o'][6],
-                                   self.IB.state['o'][7],
-                                   self.IB.state['o'][8],
-                                   self.IB.state['o'][9],
-                                   self.IB.state['gs_domain'],
-                                   self.IB.state['gs_sys_response'],
-                                   self.IB.state['gs_phi_idx'],
-                                   self.IB.state['hv'],
-                                   self.IB.state['hg']]
+        markovian_states_values = [
+            self.IB.state["p"],
+            self.IB.state["v"],
+            self.IB.state["g"],
+            self.IB.state["h"],
+            self.IB.state["f"],
+            self.IB.state["c"],
+            self.IB.state["o"][0],
+            self.IB.state["o"][1],
+            self.IB.state["o"][2],
+            self.IB.state["o"][3],
+            self.IB.state["o"][4],
+            self.IB.state["o"][5],
+            self.IB.state["o"][6],
+            self.IB.state["o"][7],
+            self.IB.state["o"][8],
+            self.IB.state["o"][9],
+            self.IB.state["gs_domain"],
+            self.IB.state["gs_sys_response"],
+            self.IB.state["gs_phi_idx"],
+            self.IB.state["hv"],
+            self.IB.state["hg"],
+        ]
 
         info = OrderedDict(zip(markovian_states_variables, markovian_states_values))
         return info

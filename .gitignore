@@ -8,3 +8,7 @@
 *.settings/
 *.classpath
 *.project
+.venv/
+build/
+dist/
+industrial_benchmark_python.egg-info/

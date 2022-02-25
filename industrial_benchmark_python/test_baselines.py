@@ -25,14 +25,13 @@ SOFTWARE.
 """
 
 import numpy as np
-
+from stable_baselines import A2C, ACKTR, DDPG, PPO2, SAC, TD3, TRPO
+from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines.ddpg.noise import AdaptiveParamNoiseSpec, NormalActionNoise, OrnsteinUhlenbeckActionNoise
 from stable_baselines.ddpg.policies import MlpPolicy as ddpgPolicy
 from stable_baselines.sac.policies import MlpPolicy as sacPolicy
 from stable_baselines.td3.policies import MlpPolicy as td3Policy
-from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.ddpg.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise, AdaptiveParamNoiseSpec
-from stable_baselines import A2C, DDPG, ACKTR, PPO2, SAC, TD3, TRPO
 
 from industrial_benchmark_python.IBGym import IBGym
 
@@ -40,15 +39,14 @@ algorithms = [("a2c", A2C), ("acktr", ACKTR), ("ppo", PPO2), ("sac", SAC), ("td3
 GAMMA = 0.97
 N_trials = 5
 
-print("Training the following Algorithms on the industrial benchmark", N_trials, "times each:\n",
-      [x[0] for x in algorithms], "\n")
+print("Training the following Algorithms on the industrial benchmark", N_trials, "times each:\n", [x[0] for x in algorithms], "\n")
 
 for i in range(N_trials):
     print("Starting training round", i)
     for name, algo in algorithms:
         print("-->", name)
         # create environment
-        env = IBGym(setpoint=70, reward_type='classic', action_type='continuous', observation_type='include_past')
+        env = IBGym(setpoint=70, reward_type="classic", action_type="continuous", observation_type="include_past")
 
         # the noise objects for DDPG
         n_actions = env.action_space.shape[-1]
@@ -79,7 +77,7 @@ avg_rewards = []
 for idx in range(N_trials):
     print("Starting Evaluation round", idx)
     for name, algo in algorithms:
-        env = IBGym(setpoint=70, reward_type='classic', action_type='continuous', observation_type='include_past')
+        env = IBGym(setpoint=70, reward_type="classic", action_type="continuous", observation_type="include_past")
 
         A = algo.load("{0}-{1}_IB".format(name, idx))
         num_trajectories = 100

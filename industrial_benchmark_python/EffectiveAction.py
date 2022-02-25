@@ -1,8 +1,4 @@
-# coding=utf-8
-from __future__ import print_function
-from __future__ import division
-import numpy as np
-'''
+"""
 The MIT License (MIT)
 
 Copyright 2017 Siemens AG
@@ -26,11 +22,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
+
 
 class EffectiveAction(object):
 
-    def __init__(self, velocity,gain, setpoint):
+    def __init__(self, velocity, gain, setpoint):
         self.setpoint = setpoint
         self.effectiveVelocity = self.calcEffectiveVelocity(velocity, gain, setpoint)
         self.effectiveGain = self.calcEffectiveGain(gain, setpoint)
@@ -48,10 +45,10 @@ class EffectiveAction(object):
         return (betaUnscaled - minBetaUnscaled) / (maxBetaUnscaled - minBetaUnscaled)
 
     def calcEffectiveA(self, a, setpoint):
-        return a + 101. - setpoint
+        return a + 101.0 - setpoint
 
     def calcEffectiveB(self, b, setpoint):
-        return b + 1. + setpoint
+        return b + 1.0 + setpoint
 
     def calcEffectiveVelocityUnscaled(self, effectiveA, effectiveB):
         return (effectiveB + 1.0) / effectiveA

@@ -1,9 +1,6 @@
 # coding: utf8
-import numpy as np
-from numpy import pi, sign
-from industrial_benchmark_python.goldstone import reward_function
 from enum import Enum
-'''
+"""
 The MIT License (MIT)
 
 Copyright 2017 Siemens AG
@@ -27,9 +24,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
+
+import numpy as np
+
+from industrial_benchmark_python.goldstone import reward_function
+
 
 class dynamics:
+
     class Domain(Enum):
         negative = -1
         positive = +1
@@ -44,8 +47,8 @@ class dynamics:
         self._penalty_functions_array = self._define_reward_functions(number_steps, max_required_step)
 
     def _check_safe_zone(self, safe_zone):
-        if (safe_zone < 0):
-            raise ValueError('safe_zone must be non-negative')
+        if safe_zone < 0:
+            raise ValueError("safe_zone must be non-negative")
         return safe_zone
 
     def reset(self):
@@ -81,20 +84,20 @@ class dynamics:
         return domain, phi_idx, system_response
 
     def _compute_domain(self, domain, position):
-        #compute the new domain of control action
+        # compute the new domain of control action
         if abs(position) <= self._safe_zone:
             return domain
         else:
-            return self.Domain(sign(position))
+            return self.Domain(np.sign(position))
 
     def _compute_angular_step(self, domain, phi_idx, system_response, position):
         # cool down: when position close to zero
         if abs(position) <= self._safe_zone:  # cool down
-            return -sign(phi_idx)
+            return -np.sign(phi_idx)
 
         if phi_idx == -domain.value * self._strongest_penality_abs_idx:
             return 0
-        return system_response.value * sign(position)
+        return system_response.value * np.sign(position)
 
     def _updated_system_response(self, phi_idx, system_response):
         if abs(phi_idx) >= self._strongest_penality_abs_idx:
@@ -118,7 +121,7 @@ class dynamics:
 
     def _define_reward_functions(self, number_steps, max_required_step):
         k = self._strongest_penality_abs_idx
-        angle_gid = np.arange(-k, k + 1) * 2 * pi / number_steps
+        angle_gid = np.arange(-k, k + 1) * 2 * np.pi / number_steps
         reward_functions = [reward_function.reward_function(Phi, max_required_step) for Phi in angle_gid]
 
         self._penalty_functions_array = np.array(reward_functions)
@@ -126,7 +129,7 @@ class dynamics:
 
     def compute_strongest_penalty_absIdx(self, number_steps):
         if (number_steps < 1) or (number_steps % 4 != 0):
-            raise ValueError('number_steps must be positive and integer multiple of 4')
+            raise ValueError("number_steps must be positive and integer multiple of 4")
 
         _strongest_penality_abs_idx = number_steps // 4
         return _strongest_penality_abs_idx
