@@ -42,7 +42,6 @@ class IBGym(gym.Env):
         action_type="continuous",
         observation_type="classic",
         reset_after_timesteps=1000,
-        init_seed=None,
         n_past_timesteps=30
     ):
         """
@@ -59,10 +58,6 @@ class IBGym(gym.Env):
 
         # IB environment parameter
         self.setpoint = setpoint
-
-        # initial seeding
-        self.init_seed = init_seed
-        np.random.seed(self.init_seed)
 
         # Used to determine whether to return the absolute value or the relative change in the cost function
         self.reward_function = reward_type
@@ -148,28 +143,22 @@ class IBGym(gym.Env):
         return return_observation, return_reward, done, info
 
     @property
-    def reward(self):
+    def reward(self) -> float:
         return -self.IB.state["cost"]
 
-    def reset(self):
+    def reset(self, seed: int = None) -> np.ndarray:
         """
         resets environment
         :return: first observation of fresh environment
         """
-
-        # ensure reproducibility, but still use different env / seed on every reset
-        self.IB = IDS(self.setpoint, inital_seed=self.init_seed)
-        self.init_seed = np.random.randint(0, 100000)
+        self.IB = IDS(self.setpoint, inital_seed=seed)
 
         self.observation = None
         self.last_action = None  # contains the action taken in the last step
-
-        return_observation = self._update_observation()
-
         # used to set the self.done variable - If larger than self.reset_after_timesteps, the environment resets
         self.env_steps = 0
 
-        return return_observation
+        return self._update_observation()
 
     def render(self, mode="human"):
         """

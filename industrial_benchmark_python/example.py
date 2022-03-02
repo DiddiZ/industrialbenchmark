@@ -31,6 +31,7 @@ from industrial_benchmark_python.IDS import IDS
 
 n_trajectories = 10
 T = 1000
+rng = np.random.default_rng()
 
 data = np.zeros((n_trajectories, T))
 data_cost = np.zeros((n_trajectories, T))
@@ -38,7 +39,7 @@ data_cost = np.zeros((n_trajectories, T))
 for k in range(n_trajectories):
     env = IDS(p=100)
     for t in range(T):
-        at = 2 * np.random.rand(3) - 1
+        at = 2 * rng.random(3) - 1
         markovStates = env.step(at)
         data[k, t] = env.visibleState()[-1]
 

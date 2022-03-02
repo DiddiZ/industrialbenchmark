@@ -49,8 +49,7 @@ class IDS(object):
         """
 
         # fix seed only for testing
-        # if inital_seed != None:
-        np.random.seed(inital_seed)
+        self.rng = np.random.default_rng(inital_seed)
 
         # constants
         self.maxRequiredStep = np.sin(15.0 / 180.0 * np.pi)
@@ -125,7 +124,7 @@ class IDS(object):
             new_p = self.state["p"] + self._p_ch
             if new_p > 100 or new_p < 0:
 
-                if np.random.rand() > 0.5:
+                if self.rng.random() > 0.5:
                     self._p_ch *= -1
 
             new_p = np.clip(new_p, 0, 100)
@@ -165,13 +164,13 @@ class IDS(object):
         self.state["ge"] = effAct_gain
         self.state["ve"] = effAct_velocity
 
-        noise_e_g = np.random.exponential(expLambda)
-        noise_e_v = np.random.exponential(expLambda)
-        noise_u_g = np.random.rand()
-        noise_u_v = np.random.rand()
+        noise_e_g = self.rng.exponential(expLambda)
+        noise_e_v = self.rng.exponential(expLambda)
+        noise_u_g = self.rng.random()
+        noise_u_v = self.rng.random()
 
-        noise_b_g = float(np.random.binomial(1, np.clip(effAct_gain, 0.001, 0.999)))
-        noise_b_v = float(np.random.binomial(1, np.clip(effAct_velocity, 0.001, 0.999)))
+        noise_b_g = float(self.rng.binomial(1, np.clip(effAct_gain, 0.001, 0.999)))
+        noise_b_v = float(self.rng.binomial(1, np.clip(effAct_velocity, 0.001, 0.999)))
 
         noise_gain = 2.0 * (1.0 / (1.0 + np.exp(-noise_e_g)) - 0.5)
         noise_velocity = 2.0 * (1.0 / (1.0 + np.exp(-noise_e_v)) - 0.5)
@@ -194,7 +193,7 @@ class IDS(object):
             hidden_velocity = 0.9 * hidden_velocity + noise_velocity / 3.0
 
         if np.maximum(hidden_velocity, hidden_gain) == fatigueAmplificationMax:
-            alpha = 1.0 / (1.0 + np.exp(-np.random.normal(2.4, 0.4)))
+            alpha = 1.0 / (1.0 + np.exp(-self.rng.normal(2.4, 0.4)))
         else:
             alpha = np.maximum(noise_velocity, noise_gain)
 
@@ -249,7 +248,7 @@ class IDS(object):
     def updateOperationalCosts(self):
         rGS = self.state["MC"]
         eNewHidden = self.state["oc"] - (self.CRGS * (rGS - 1.0))
-        operationalcosts = eNewHidden - np.random.randn() * (1 + 0.005 * eNewHidden)
+        operationalcosts = eNewHidden - self.rng.normal() * (1 + 0.005 * eNewHidden)
         self.state["c"] = operationalcosts
 
     def updateCost(self):
@@ -261,10 +260,10 @@ class IDS(object):
         self.state["reward"] = -cost
 
     def defineNewSequence(self):
-        length = np.random.randint(1, 100)
+        length = self.rng.integers(1, 100)
         self._p_steps = length
         self._p_step = 0
-        p_ch = 2 * np.random.rand() - 1
-        if np.random.rand() < 0.1:
+        p_ch = 2 * self.rng.random() - 1
+        if self.rng.random() < 0.1:
             p_ch *= 0.0
         self._p_ch = p_ch

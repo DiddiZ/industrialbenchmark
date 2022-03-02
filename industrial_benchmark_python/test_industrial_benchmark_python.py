@@ -22,6 +22,7 @@ class TestIB(unittest.TestCase):
     def test_example(self):
         trajectories = 10
         T = 1000  # perform 1000 actions/ steps
+        rng = np.random.default_rng(0)
 
         # generate different values of setpoint
         p = [88, 32, 40, 80, 97, 78, 95, 84, 54, 69]
@@ -33,9 +34,8 @@ class TestIB(unittest.TestCase):
 
             markovStates = np.empty((T, 29))
             for t in range(T):
-                at = 2 * np.random.rand(3) - 1
                 # perform action
-                env.step(at)
+                env.step(2 * rng.random(3) - 1)
                 markovStates[t] = self.all_states(env)
 
             # test if test files and original files are equal

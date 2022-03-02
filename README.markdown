@@ -1,4 +1,8 @@
-﻿# Industrial Benchmark 
+﻿# Changes
+This fork of the IB avoids using the global random generator and allows to use a fixed seed when resetting the evn, enabling determistic rollouts.
+
+
+# Industrial Benchmark 
  
 The "Industrial Benchmark" is a realistic benchmark for offline RL and online RL, used to find those RL algorithms that are best suited for real-world applications.
 
