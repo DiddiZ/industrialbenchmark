@@ -7,9 +7,9 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./tests",
+        "./industrial_benchmark_python",
         "-p",
-        "*_test.py"
+        "test_*.py"
     ],
     "python.testing.unittestEnabled": true
 }

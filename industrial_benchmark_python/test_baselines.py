@@ -27,8 +27,7 @@ SOFTWARE.
 import numpy as np
 from stable_baselines import A2C, ACKTR, DDPG, PPO2, SAC, TD3, TRPO
 from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.ddpg.noise import AdaptiveParamNoiseSpec, NormalActionNoise, OrnsteinUhlenbeckActionNoise
+from stable_baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 from stable_baselines.ddpg.policies import MlpPolicy as ddpgPolicy
 from stable_baselines.sac.policies import MlpPolicy as sacPolicy
 from stable_baselines.td3.policies import MlpPolicy as td3Policy

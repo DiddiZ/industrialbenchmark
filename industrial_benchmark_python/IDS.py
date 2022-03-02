@@ -170,8 +170,8 @@ class IDS(object):
         noise_u_g = np.random.rand()
         noise_u_v = np.random.rand()
 
-        noise_b_g = np.float(np.random.binomial(1, np.clip(effAct_gain, 0.001, 0.999)))
-        noise_b_v = np.float(np.random.binomial(1, np.clip(effAct_velocity, 0.001, 0.999)))
+        noise_b_g = float(np.random.binomial(1, np.clip(effAct_gain, 0.001, 0.999)))
+        noise_b_v = float(np.random.binomial(1, np.clip(effAct_velocity, 0.001, 0.999)))
 
         noise_gain = 2.0 * (1.0 / (1.0 + np.exp(-noise_e_g)) - 0.5)
         noise_velocity = 2.0 * (1.0 / (1.0 + np.exp(-noise_e_v)) - 0.5)
